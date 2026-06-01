@@ -1,0 +1,70 @@
+CREATE TABLE labels (
+	label_id serial PRIMARY KEY,
+	label_name varchar(255) NOT NULL UNIQUE
+); 
+CREATE TABLE artists (
+	artist_id serial PRIMARY KEY,
+	artist_name varchar(255) NOT NULL UNIQUE,
+); 
+CREATE TABLE genres (
+	genre_id serial PRIMARY KEY,
+	genre_name varchar(100) NOT NULL UNIQUE
+); 
+CREATE TABLE real_names (
+	name_id serial PRIMARY KEY,
+	first_name varchar(100),
+	last_name varchar(100)
+); 
+CREATE TABLE albums (
+	upc char(12) PRIMARY KEY,
+	album_title varchar(255) NOT NULL,
+	release_date date
+); 
+CREATE TABLE artist_albums (
+	artist_id int NOT NULL,
+	upc char(12) NOT NULL,
+	PRIMARY KEY (artist_id, upc),
+	FOREIGN KEY (artist_id) REFERENCES artists (artist_id) 
+	ON DELETE CASCADE,
+	FOREIGN KEY (upc) REFERENCES albums (upc) 
+	ON DELETE CASCADE
+); 
+CREATE TABLE album_labels (
+	upc char(12) NOT NULL,
+	label_id int NOT NULL,
+	PRIMARY KEY (upc, label_id),
+	FOREIGN KEY (upc) REFERENCES albums (upc) 
+	ON DELETE CASCADE,
+	FOREIGN KEY (label_id) REFERENCES labels (label_id) 
+	ON DELETE CASCADE
+); 
+CREATE TABLE artist_real_names (
+	artist_id int NOT NULL,
+	name_id int NOT NULL,
+	PRIMARY KEY (artist_id, name_id),
+	FOREIGN KEY (artist_id) REFERENCES artists (artist_id),
+	FOREIGN KEY (name_id) 
+	REFERENCES real_names (name_id)
+); 
+CREATE TABLE songs (
+	song_id serial PRIMARY KEY,
+	song_title varchar(255) NOT NULL,
+	streams int DEFAULT 0 CHECK (streams >= 0),
+	downloads int DEFAULT 0 CHECK (downloads >= 0),
+	favorites int DEFAULT 0 CHECK (favorites >= 0),
+	is_explicit boolean DEFAULT FALSE,
+	isrc_country char(2) NOT NULL,
+	isrc_registrant char(3) NOT NULL,
+	isrc_year char(2) NOT NULL,
+	isrc_designation char(5) NOT NULL,
+	upc char(12) NOT NULL,
+	genre_id int NOT NULL REFERENCES genres (genre_id),
+	FOREIGN KEY (upc) REFERENCES albums (upc) 
+	ON DELETE CASCADE,
+	UNIQUE (
+		isrc_country,
+		isrc_registrant,
+		isrc_year,
+		isrc_designation
+	)
+); 
